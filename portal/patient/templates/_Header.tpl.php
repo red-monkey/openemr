@@ -1,10 +1,10 @@
 <?php
 
 /**
- * _Header.tpl.php
+ * _Header.tpl.php.
  *
- * @package   OpenEMR
- * @link      https://www.open-emr.org
+ * @see      https://www.open-emr.org
+ *
  * @author    Jerry Padgett <sjpadgett@gmail.com>
  * @author    Tyler Wrenn <tyler@tylerwrenn.com>
  * @copyright Copyright (c) 2016-2020 Jerry Padgett <sjpadgett@gmail.com>

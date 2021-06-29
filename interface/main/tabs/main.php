@@ -1,10 +1,10 @@
 <?php
 
 /**
- * main.php
+ * main.php.
  *
- * @package   OpenEMR
- * @link      http://www.open-emr.org
+ * @see      http://www.open-emr.org
+ *
  * @author    Kevin Yeh <kevin.y@integralemr.com>
  * @author    Brady Miller <brady.g.miller@gmail.com>
  * @author    Ranganath Pathak <pathak@scrs1.org>
@@ -14,10 +14,11 @@
  * @copyright Copyright (c) 2019 Ranganath Pathak <pathak@scrs1.org>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
-
 $sessionAllowWrite = true;
-require_once(__DIR__ . '/../../globals.php');
-require_once $GLOBALS['srcdir'] . '/ESign/Api.php';
+
+require_once __DIR__.'/../../globals.php';
+
+require_once $GLOBALS['srcdir'].'/ESign/Api.php';
 
 use Esign\Api;
 use OpenEMR\Common\Acl\AclMain;
@@ -27,9 +28,9 @@ use OpenEMR\Core\Header;
 // Ensure token_main matches so this script can not be run by itself
 //  If do not match, then destroy the session and go back to login screen
 if (
-    (empty($_SESSION['token_main_php'])) ||
-    (empty($_GET['token_main'])) ||
-    ($_GET['token_main'] != $_SESSION['token_main_php'])
+    (empty($_SESSION['token_main_php']))
+    || (empty($_GET['token_main']))
+    || ($_GET['token_main'] != $_SESSION['token_main_php'])
 ) {
     // Below functions are from auth.inc, which is included in globals.php
     authCloseSession();
@@ -59,7 +60,7 @@ $esignApi = new Api();
         });
         <?php } ?>
 
-        <?php require($GLOBALS['srcdir'] . "/restoreSession.php"); ?>
+        <?php require $GLOBALS['srcdir'].'/restoreSession.php'; ?>
 
         // Since this should be the parent window, this is to prevent calls to the
         // window that opened this window. For example when a new window is opened
@@ -74,7 +75,7 @@ $esignApi = new Api();
         // some globals to access using top.variable
         // note that 'let' or 'const' does not allow global scope here.
         // only use var
-        var isPortalEnabled = "<?php echo $GLOBALS['portal_onsite_two_enable'] ?>";
+        var isPortalEnabled = "<?php echo $GLOBALS['portal_onsite_two_enable']; ?>";
         // Set the csrf_token_js token that is used in the below js/tabs_view_model.js script
         var csrf_token_js = <?php echo js_escape(CsrfUtils::collectCsrfToken()); ?>;
         var userDebug = <?php echo js_escape($GLOBALS['user_debug']); ?>;
@@ -193,7 +194,7 @@ $esignApi = new Api();
         // set up global translations for js
         function setupI18n(lang_id) {
             restoreSession();
-            return fetch(<?php echo js_escape($GLOBALS['webroot'])?> +"/library/ajax/i18n_generator.php?lang_id=" + encodeURIComponent(lang_id) + "&csrf_token_form=" + encodeURIComponent(csrf_token_js), {
+            return fetch(<?php echo js_escape($GLOBALS['webroot']); ?> +"/library/ajax/i18n_generator.php?lang_id=" + encodeURIComponent(lang_id) + "&csrf_token_form=" + encodeURIComponent(csrf_token_js), {
                 credentials: 'same-origin',
                 method: 'GET'
             }).then(response => response.json())
@@ -229,9 +230,9 @@ $esignApi = new Api();
     //
     // prepare newcrop globals that are used in creating the menu
     if ($GLOBALS['erx_enable']) {
-        $newcrop_user_role_sql = sqlQuery("SELECT `newcrop_user_role` FROM `users` WHERE `username` = ?", array($_SESSION['authUser']));
+        $newcrop_user_role_sql = sqlQuery('SELECT `newcrop_user_role` FROM `users` WHERE `username` = ?', [$_SESSION['authUser']]);
         $GLOBALS['newcrop_user_role'] = $newcrop_user_role_sql['newcrop_user_role'];
-        if ($GLOBALS['newcrop_user_role'] === 'erxadmin') {
+        if ('erxadmin' === $GLOBALS['newcrop_user_role']) {
             $GLOBALS['newcrop_user_role_erxadmin'] = 1;
         }
     }
@@ -240,33 +241,33 @@ $esignApi = new Api();
     $track_anything_sql = sqlQuery("SELECT `state` FROM `registry` WHERE `directory` = 'track_anything'");
     $GLOBALS['track_anything_state'] = ($track_anything_sql['state'] ?? 0);
     // prepare Issues popup link global that is used in creating the menu
-    $GLOBALS['allow_issue_menu_link'] = ((AclMain::aclCheckCore('encounters', 'notes', '', 'write') || AclMain::aclCheckCore('encounters', 'notes_a', '', 'write')) &&
-        AclMain::aclCheckCore('patients', 'med', '', 'write'));
+    $GLOBALS['allow_issue_menu_link'] = ((AclMain::aclCheckCore('encounters', 'notes', '', 'write') || AclMain::aclCheckCore('encounters', 'notes_a', '', 'write'))
+        && AclMain::aclCheckCore('patients', 'med', '', 'write'));
     ?>
 
-    <?php require_once("templates/tabs_template.php"); ?>
-    <?php require_once("templates/menu_template.php"); ?>
-    <?php require_once("templates/patient_data_template.php"); ?>
-    <?php require_once("templates/therapy_group_template.php"); ?>
-    <?php require_once("templates/user_data_template.php"); ?>
-    <?php require_once("menu/menu_json.php"); ?>
-    <?php $userQuery = sqlQuery("select * from users where username = ?", array($_SESSION['authUser'])); ?>
+    <?php require_once 'templates/tabs_template.php'; ?>
+    <?php require_once 'templates/menu_template.php'; ?>
+    <?php require_once 'templates/patient_data_template.php'; ?>
+    <?php require_once 'templates/therapy_group_template.php'; ?>
+    <?php require_once 'templates/user_data_template.php'; ?>
+    <?php require_once 'menu/menu_json.php'; ?>
+    <?php $userQuery = sqlQuery('select * from users where username = ?', [$_SESSION['authUser']]); ?>
 
     <script>
         <?php if (!empty($_SESSION['frame1url']) && !empty($_SESSION['frame1target'])) { ?>
         // Use session variables and tabStatus object to set up initial/default first tab
-        app_view_model.application_data.tabs.tabsList.push(new tabStatus(<?php echo xlj("Loading"); ?> +"...",<?php echo json_encode("../" . $_SESSION['frame1url']); ?>,<?php echo json_encode($_SESSION['frame1target']); ?>,<?php echo xlj("Loading"); ?> +" " + <?php echo json_encode($_SESSION['frame1label']); ?>, true, true, false));
+        app_view_model.application_data.tabs.tabsList.push(new tabStatus(<?php echo xlj('Loading'); ?> +"...",<?php echo json_encode('../'.$_SESSION['frame1url']); ?>,<?php echo json_encode($_SESSION['frame1target']); ?>,<?php echo xlj('Loading'); ?> +" " + <?php echo json_encode($_SESSION['frame1label']); ?>, true, true, false));
         <?php } ?>
 
         <?php if (!empty($_SESSION['frame2url']) && !empty($_SESSION['frame2target'])) { ?>
         // Use session variables and tabStatus object to set up initial/default second tab, if none is set in globals, this tab will not be displayed initially
-        app_view_model.application_data.tabs.tabsList.push(new tabStatus(<?php echo xlj("Loading"); ?> +"...",<?php echo json_encode("../" . $_SESSION['frame2url']); ?>,<?php echo json_encode($_SESSION['frame2target']); ?>,<?php echo xlj("Loading"); ?> +" " + <?php echo json_encode($_SESSION['frame2label']); ?>, true, false, false));
+        app_view_model.application_data.tabs.tabsList.push(new tabStatus(<?php echo xlj('Loading'); ?> +"...",<?php echo json_encode('../'.$_SESSION['frame2url']); ?>,<?php echo json_encode($_SESSION['frame2target']); ?>,<?php echo xlj('Loading'); ?> +" " + <?php echo json_encode($_SESSION['frame2label']); ?>, true, false, false));
         <?php } ?>
 
-        app_view_model.application_data.user(new user_data_view_model(<?php echo json_encode($_SESSION["authUser"])
-            . ',' . json_encode($userQuery['fname'])
-            . ',' . json_encode($userQuery['lname'])
-            . ',' . json_encode($_SESSION['authProvider']); ?>));
+        app_view_model.application_data.user(new user_data_view_model(<?php echo json_encode($_SESSION['authUser'])
+            .','.json_encode($userQuery['fname'])
+            .','.json_encode($userQuery['lname'])
+            .','.json_encode($_SESSION['authProvider']); ?>));
 
     </script>
 <style>
@@ -284,20 +285,21 @@ $esignApi = new Api();
     $disp_mainBox = '';
     if (isset($_SESSION['app1'])) {
         $rs = sqlquery(
-            "SELECT title app_url FROM list_options WHERE activity=1 AND list_id=? AND option_id=?",
-            array('apps', $_SESSION['app1'])
+            'SELECT title app_url FROM list_options WHERE activity=1 AND list_id=? AND option_id=?',
+            ['apps', $_SESSION['app1']]
         );
-        if ($rs['app_url'] != "main/main_screen.php") {
-            echo '<iframe name="app1" src="../../' . attr($rs['app_url']) . '"
+        if ('main/main_screen.php' != $rs['app_url']) {
+            echo '<iframe name="app1" src="../../'.attr($rs['app_url']).'"
     			style="position: absolute; left: 0; top: 0; height: 100%; width: 100%; border: none;" />';
             $disp_mainBox = 'style="display: none;"';
         }
     }
     ?>
-    <div id="mainBox" <?php echo $disp_mainBox ?> >
+    <div id="mainBox" <?php echo $disp_mainBox; ?> >
         <nav class="navbar navbar-expand-xl navbar-light bg-light py-0">
-            <a class="navbar-brand mt-2 mt-xl-0 mr-3 mr-xl-2" href="https://www.open-emr.org" title="OpenEMR <?php echo xla("Website"); ?>" rel="noopener" target="_blank">
-                <?php echo file_get_contents($GLOBALS['images_static_absolute'] . "/menu-logo.svg"); ?>
+            <a class="navbar-brand mt-2 mt-xl-0 mr-3 mr-xl-2" href="https://medixbot.com" title="OpenEMR <?php echo xla('Website'); ?>" rel="noopener" target="_blank">
+                <img src="<?php echo $GLOBALS['images_static_relative']; ?>/medixbot-logo.png" alt="medixbot" height="50">
+                <?php //echo file_get_contents($GLOBALS['images_static_absolute'].'/medixbot-logo.png');?>
             </a>
             <button class="navbar-toggler mr-auto" type="button" data-toggle="collapse" data-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
