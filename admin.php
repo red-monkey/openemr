@@ -1,11 +1,10 @@
 <?php
 
 /**
- *
  * Multi Site Administration script.
  *
- * @package OpenEMR
- * @link    https://www.open-emr.org
+ * @see    https://www.open-emr.org
+ *
  * @author Rod Roark <rod@sunsetsystems.com>
  * @author Ranganath Pathak <pathak@scrs1.org>
  * @copyright Copyright (C) 2010 Rod Roark <rod@sunsetsystems.com>
@@ -14,30 +13,29 @@
  */
 
 // Checks if the server's PHP version is compatible with OpenEMR:
-require_once(dirname(__FILE__) . "/src/Common/Compatibility/Checker.php");
+require_once dirname(__FILE__).'/src/Common/Compatibility/Checker.php';
 $response = OpenEMR\Common\Compatibility\Checker::checkPhpVersion();
-if ($response !== true) {
-    die(htmlspecialchars($response));
+if (true !== $response) {
+    exit(htmlspecialchars($response));
 }
 
-require_once "version.php";
+require_once 'version.php';
 
 $webserver_root = dirname(__FILE__);
-if (stripos(PHP_OS, 'WIN') === 0) {
-    $webserver_root = str_replace("\\", "/", $webserver_root);
+if (0 === stripos(PHP_OS, 'WIN')) {
+    $webserver_root = str_replace('\\', '/', $webserver_root);
 }
 
-$OE_SITES_BASE = "$webserver_root/sites";
+$OE_SITES_BASE = "{$webserver_root}/sites";
 
 function sqlQuery($statement, $link)
 {
-    $row = mysqli_fetch_array(mysqli_query($link, $statement), MYSQLI_ASSOC);
-    return $row;
+    return mysqli_fetch_array(mysqli_query($link, $statement), MYSQLI_ASSOC);
 }
 ?>
 <html>
 <head>
-    <title>OpenEMR Site Administration</title>
+    <title>Medixbot Site Administration</title>
     <link rel="stylesheet" href="public/assets/bootstrap/dist/css/bootstrap.min.css">
     <script src="public/assets/jquery/dist/jquery.min.js"></script>
     <script src="public/assets/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -72,26 +70,26 @@ function sqlQuery($statement, $link)
                         <?php
                         $dh = opendir($OE_SITES_BASE);
                         if (!$dh) {
-                            die("Cannot read directory '$OE_SITES_BASE'.");
+                            exit("Cannot read directory '{$OE_SITES_BASE}'.");
                         }
 
-                        $siteslist = array();
+                        $siteslist = [];
 
                         while (false !== ($sfname = readdir($dh))) {
-                            if (substr($sfname, 0, 1) == '.') {
+                            if ('.' == substr($sfname, 0, 1)) {
                                 continue;
                             }
 
-                            if ($sfname == 'CVS') {
+                            if ('CVS' == $sfname) {
                                 continue;
                             }
 
-                            $sitedir = "$OE_SITES_BASE/$sfname";
+                            $sitedir = "{$OE_SITES_BASE}/{$sfname}";
                             if (!is_dir($sitedir)) {
                                 continue;
                             }
 
-                            if (!is_file("$sitedir/sqlconf.php")) {
+                            if (!is_file("{$sitedir}/sqlconf.php")) {
                                 continue;
                             }
 
@@ -103,29 +101,29 @@ function sqlQuery($statement, $link)
 
                         $encount = 0;
                         foreach ($siteslist as $sfname) {
-                            $sitedir = "$OE_SITES_BASE/$sfname";
+                            $sitedir = "{$OE_SITES_BASE}/{$sfname}";
                             $errmsg = '';
                             ++$encount;
 
                             echo " <tr>\n";
 
-                        // Access the site's database.
-                            include "$sitedir/sqlconf.php";
+                            // Access the site's database.
+                            include "{$sitedir}/sqlconf.php";
 
                             if ($config) {
-                                $dbh = mysqli_connect("$host", "$login", "$pass", $dbase, $port);
+                                $dbh = mysqli_connect("{$host}", "{$login}", "{$pass}", $dbase, $port);
                                 if (!$dbh) {
-                                    $errmsg = "MySQL connect failed";
+                                    $errmsg = 'MySQL connect failed';
                                 }
                             }
 
-                            echo "  <td>$sfname</td>\n";
-                            echo "  <td>$dbase</td>\n";
+                            echo "  <td>{$sfname}</td>\n";
+                            echo "  <td>{$dbase}</td>\n";
 
                             if (!$config) {
-                                echo "  <td colspan='3'><a href='setup.php?site=$sfname' class='text-decoration-none'>Needs setup, click here to run it</a></td>\n";
+                                echo "  <td colspan='3'><a href='setup.php?site={$sfname}' class='text-decoration-none'>Needs setup, click here to run it</a></td>\n";
                             } elseif ($errmsg) {
-                                echo "  <td colspan='3' class='text-danger'>$errmsg</td>\n";
+                                echo "  <td colspan='3' class='text-danger'>{$errmsg}</td>\n";
                             } else {
                                 // Get site name for display.
                                 $row = sqlQuery("SELECT gl_value FROM globals WHERE gl_name = 'openemr_name' LIMIT 1", $dbh);
@@ -137,33 +135,33 @@ function sqlQuery($statement, $link)
                                     $openemr_version = 'Unknown';
                                     $database_version = 0;
                                 } else {
-                                    $row = sqlQuery("SELECT * FROM version LIMIT 1", $dbh);
-                                    $database_patch_txt = "";
-                                    if (!(empty($row['v_realpatch'])) && $row['v_realpatch'] != 0) {
-                                        $database_patch_txt = " (" . $row['v_realpatch'] . ")";
+                                    $row = sqlQuery('SELECT * FROM version LIMIT 1', $dbh);
+                                    $database_patch_txt = '';
+                                    if (!(empty($row['v_realpatch'])) && 0 != $row['v_realpatch']) {
+                                        $database_patch_txt = ' ('.$row['v_realpatch'].')';
                                     }
 
-                                    $openemr_version = $row['v_major'] . "." . $row['v_minor'] . "." .
-                                    $row['v_patch'] . $row['v_tag'] . $database_patch_txt;
+                                    $openemr_version = $row['v_major'].'.'.$row['v_minor'].'.'.
+                                    $row['v_patch'].$row['v_tag'].$database_patch_txt;
                                     $database_version = 0 + $row['v_database'];
                                     $database_acl = 0 + $row['v_acl'];
                                     $database_patch = 0 + $row['v_realpatch'];
                                 }
 
                                 // Display relevant columns.
-                                echo "  <td>$openemr_name</td>\n";
-                                echo "  <td>$openemr_version</td>\n";
+                                echo "  <td>{$openemr_name}</td>\n";
+                                echo "  <td>{$openemr_version}</td>\n";
                                 if ($v_database != $database_version) {
-                                    echo "  <td><a href='sql_upgrade.php?site=$sfname' class='text-decoration-none'>Upgrade Database</a></td>\n";
+                                    echo "  <td><a href='sql_upgrade.php?site={$sfname}' class='text-decoration-none'>Upgrade Database</a></td>\n";
                                 } elseif (($v_acl > $database_acl)) {
-                                    echo "  <td><a href='acl_upgrade.php?site=$sfname' class='text-decoration-none'>Upgrade Access Controls</a></td>\n";
+                                    echo "  <td><a href='acl_upgrade.php?site={$sfname}' class='text-decoration-none'>Upgrade Access Controls</a></td>\n";
                                 } elseif (($v_realpatch != $database_patch)) {
-                                    echo "  <td><a href='sql_patch.php?site=$sfname' class='text-decoration-none'>Patch Database</a></td>\n";
+                                    echo "  <td><a href='sql_patch.php?site={$sfname}' class='text-decoration-none'>Patch Database</a></td>\n";
                                 } else {
                                     echo "  <td><i class='fa fa-check fa-lg text-success' aria-hidden='true' ></i></a></td>\n";
                                 }
                                 if (($v_database == $database_version) && ($v_acl <= $database_acl) && ($v_realpatch == $database_patch)) {
-                                    echo "  <td><a href='interface/login/login.php?site=$sfname' class='text-decoration-none'><i class='fa fa-sign-in-alt fa-lg' aria-hidden='true' data-toggle='tooltip' data-placement='top' title ='Login to site $sfname'></i></a></td>\n";
+                                    echo "  <td><a href='interface/login/login.php?site={$sfname}' class='text-decoration-none'><i class='fa fa-sign-in-alt fa-lg' aria-hidden='true' data-toggle='tooltip' data-placement='top' title ='Login to site {$sfname}'></i></a></td>\n";
                                 } else {
                                     echo "  <td><i class='fa fa-ban fa-lg text-secondary' aria-hidden='true'></i></td>\n";
                                 }
@@ -171,7 +169,7 @@ function sqlQuery($statement, $link)
 
                             echo " </tr>\n";
 
-                            if ($config && $dbh !== false) {
+                            if ($config && false !== $dbh) {
                                 mysqli_close($dbh);
                             }
                         }
